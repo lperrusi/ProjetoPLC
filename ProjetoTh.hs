@@ -67,8 +67,8 @@ printRope n center | n == center = "|" ++ printRope (n+1) center
                    | n <= 20 = "-" ++ printRope (n+1) center
                    | otherwise = "X B"   
 
-createThreads :: [Char] -> Int -> (Double -> MVar Double -> MVar Bool -> IO()) -> MVar Double -> MVar Bool -> IO()
-createThreads team n th mvar endMvar = do
+createThreadsA :: [Char] -> Int -> (Double -> MVar Double -> MVar Bool -> IO()) -> MVar Double -> MVar Bool -> IO()
+createThreadsA team n th mvar endMvar = do
 
     --A forca da thread varia entre 1 e 4
     mbDouble <- randomRIO (1 :: Double, 5)
@@ -77,22 +77,52 @@ createThreads team n th mvar endMvar = do
     forkIO $ th ((fromIntegral (floor mbDouble)) :: Double) mvar endMvar
     
     if n > 1 then
-        createThreads team (n-1) th mvar endMvar
+        createThreadsA team (n-1) th mvar endMvar
     else
         threadDelay 1
 
-    
+createThreadsB :: [Char] -> Int -> Double -> (Double -> MVar Double -> MVar Bool -> IO()) -> MVar Double -> MVar Bool -> IO()
+createThreadsB team n nivel th mvar endMvar = do
 
-main :: IO()
-main = do
+    --A forca da thread varia entre 1 e 4
+    mbDouble <- randomRIO (1 :: Double, 5)
+    let forca = nivel + mbDouble
+    putStrLn (team ++ "Thread " ++ show n ++ " Força: " ++ show (floor forca))
+
+    forkIO $ th ((fromIntegral (floor mbDouble)) :: Double) mvar endMvar
+    
+    if n > 1 then
+        createThreadsB team (n-1) nivel th mvar endMvar
+    else
+        threadDelay 1
+
+mainMVar2 :: IO()
+mainMVar2 = do
 
     ropeCenter <- newEmptyMVar
     endMVar <- newEmptyMVar
 
+    putStrLn "Escolha um nível - (1) (2) (3)"
+    
+    input <- getLine
+    let level = (read input :: Double)
+    if level == 1.0 then do
+        putStrLn "Nível Um Escolhido"
+    
+    else if level == 2.0 then do
+        putStrLn "Nível Dois Escolhido"
+    
+    else if level == 3.0 then do
+        putStrLn "Nível Tres Escolhido"
+    else do
+        putStrLn "Escolha entre (1) (2) (3)"
+        mainMVar2
+
     putStrLn "APERTE START!"
-    level <- getLine
-    createThreads "Time A " 3 threadteamA ropeCenter endMVar
-    createThreads "Time B " 3 threadteamB ropeCenter endMVar
+    inp <- getLine
+
+    createThreadsA "Time A " 3 threadteamA ropeCenter endMVar
+    createThreadsB "Time B " 3 level threadteamB ropeCenter endMVar
 
     putMVar ropeCenter 10.0
 
