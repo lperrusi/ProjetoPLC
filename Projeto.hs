@@ -44,8 +44,8 @@ createThreads n th mvar = do
     else
         threadDelay 1
     
-main :: IO()
-main = do
+mainMVar1 :: IO()
+mainMVar1 = do
 --cria corda no 'centro'
     ropeCenter <- newMVar 0
 
@@ -68,7 +68,7 @@ main = do
     
     else do
         putStrLn "Escolha entre (1) (2) (3)"
-        main
+        mainMVar1
 
     forkIO(threadPlayer ropeCenter)
     forkIO(threadCheck ropeCenter)
